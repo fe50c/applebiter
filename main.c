@@ -10,6 +10,37 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+#include <stdio.h>
+#include <libimobiledevice/libimobiledevice.h>
+#include <libimobiledevice/lockdown.h>
+
+#define TOOLNAME "applebiter"
+
 int main() {
-	return 0;
+	idevice_t device = NULL;
+	const char *udid = NULL;
+	lockdownd_client_t client = NULL;
+	const char *domain = "com.apple.disk_usage";
+	const char *key = "TotalDataAvailable";
+	plist_t node = NULL;
+	
+	if(idevice_new(&device, udid) != IDEVICE_E_SUCCESS) {
+		printf("device fucked\n");
+		return -1;
+	}
+
+	lockdownd_error_t err;
+	if((err = lockdownd_client_new(device, &client, TOOLNAME)) != LOCKDOWN_E_SUCCESS) {
+		printf("lockdownd fucked %s\n", lockdownd_strerror(err));
+		return -1;
+	}
+
+	if((err = lockdownd_get_value(client, domain, key, &node)) != LOCKDOWN_E_SUCCESS) {
+		printf("lockdownd fucked %s\n", lockdownd_strerror(err));
+		return -1;
+	}
+	if(!node) {
+		printf("we have no node for some reason?");
+	}
+	plist_write_to_stream(node, stdout, PLIST_FORMAT_LIMD, 0);
 }
