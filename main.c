@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <libimobiledevice/libimobiledevice.h>
 #include <libimobiledevice/lockdown.h>
+#include <plist/plist.h>
 
 #define TOOLNAME "applebiter"
 
@@ -30,7 +31,7 @@ int main() {
 	}
 
 	lockdownd_error_t err;
-	if((err = lockdownd_client_new(device, &client, TOOLNAME)) != LOCKDOWN_E_SUCCESS) {
+	if((err = lockdownd_client_new_with_handshake(device, &client, TOOLNAME)) != LOCKDOWN_E_SUCCESS) {
 		printf("lockdownd fucked %s\n", lockdownd_strerror(err));
 		return -1;
 	}
